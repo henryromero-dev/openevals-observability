@@ -1,0 +1,235 @@
+﻿@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  padding: $spacing-2xl;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  &__header {
+    @include flex-row(0, flex-start);
+    justify-content: space-between;
+    margin-bottom: $spacing-2xl;
+    padding-bottom: $spacing-xl;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__title  { font-size: $font-size-2xl; font-weight: 700; color: $color-text-heading; }
+  &__subtitle { font-size: $font-size-lg; color: $color-text-muted; margin-top: $spacing-xs; }
+  &__error  { background: $color-danger-bg; color: $color-error-dark; padding: $spacing-sm $spacing-md; border-radius: $radius-sm; margin-bottom: $spacing-lg; font-size: $font-size-lg; }
+  &__loading { color: $color-text-muted; font-size: $font-size-lg; padding: $spacing-2xl 0; text-align: center; }
+}
+
+// â”€â”€ Table â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+.sim-table {
+  @include flex-column;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &__head {
+    display: grid;
+    grid-template-columns: 2fr 1fr 100px 60px 130px 180px;
+    gap: $spacing-md;
+    padding: $spacing-sm $spacing-lg;
+    background: $color-bg-tertiary;
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__row {
+    display: grid;
+    grid-template-columns: 2fr 1fr 100px 60px 130px 180px;
+    gap: $spacing-md;
+    padding: $spacing-md $spacing-lg;
+    align-items: center;
+    border-bottom: 1px solid $color-border;
+    transition: background 0.1s;
+
+    &:last-child { border-bottom: none; }
+    &:hover { background: $color-hover-bg; }
+  }
+
+  &__name   { font-weight: 500; color: $color-text; }
+  &__persona { font-size: $font-size-lg; color: $color-text-muted; }
+  &__turns  { font-size: $font-size-lg; color: $color-text-muted; }
+  &__date   { font-size: $font-size-md; color: $color-text-light; }
+
+  &__actions {
+    @include flex-row($spacing-xs, center);
+    justify-content: flex-end;
+  }
+}
+
+// â”€â”€ Evaluator picker â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+.evaluator-picker {
+  @include flex-column($spacing-xs);
+
+  &__item {
+    @include flex-row($spacing-sm, center);
+    padding: $spacing-sm $spacing-md;
+    border: 1px solid $color-border;
+    border-radius: $radius-sm;
+    cursor: pointer;
+    font-size: $font-size-lg;
+    transition: background 0.1s;
+
+    &:hover { background: $color-hover-bg; }
+
+    &--selected {
+      background: $color-primary-light;
+      border-color: $color-primary;
+    }
+
+    input { cursor: pointer; }
+    code { margin-left: auto; font-size: $font-size-sm; color: $color-text-muted; }
+  }
+}
+
+// â”€â”€ Detail drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+.detail-section {
+  @include flex-column($spacing-md);
+  margin-bottom: $spacing-xl;
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $color-text-heading;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border;
+  }
+}
+
+.scores-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: $spacing-md;
+}
+
+.score-card {
+  @include card;
+  @include flex-column($spacing-xs);
+  text-align: center;
+
+  &__key {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__value {
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    color: $color-text;
+
+    &--pass { color: $color-success; }
+    &--fail { color: $color-error; }
+  }
+
+  &__reasoning {
+    font-size: $font-size-md;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+    text-align: left;
+  }
+}
+
+.trajectory {
+  @include flex-column($spacing-sm);
+
+  &__msg {
+    @include flex-column($spacing-xs);
+    max-width: 85%;
+
+    &--user    { align-self: flex-end; align-items: flex-end; }
+    &--assistant { align-self: flex-start; align-items: flex-start; }
+  }
+
+  &__role {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $color-text-muted;
+  }
+
+  &__content {
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-md;
+    font-size: $font-size-lg;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    .trajectory__msg--user & {
+      background: $color-secondary;
+      color: $color-white;
+      border-bottom-right-radius: $radius-xs;
+    }
+
+    .trajectory__msg--assistant & {
+      background: $color-white;
+      border: 1px solid $color-border;
+      color: $color-text;
+      border-bottom-left-radius: $radius-xs;
+    }
+  }
+}
+
+// â”€â”€ Drawers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: $color-overlay-40;
+  z-index: 900;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 480px;
+  height: 100dvh;
+  background: $color-white;
+  box-shadow: $shadow-modal-strong;
+  z-index: 1000;
+  @include flex-column;
+
+  &--wide { width: 600px; }
+
+  &__header {
+    @include flex-row(0, center);
+    justify-content: space-between;
+    padding: $spacing-lg $spacing-xl;
+    border-bottom: 1px solid $color-border;
+    flex-shrink: 0;
+  }
+
+  &__title { font-size: $font-size-xl; font-weight: 600; color: $color-text-heading; }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-xl;
+    @include flex-column($spacing-lg);
+  }
+
+  &__footer {
+    @include flex-row($spacing-sm, center);
+    justify-content: flex-end;
+    padding: $spacing-lg $spacing-xl;
+    border-top: 1px solid $color-border;
+    flex-shrink: 0;
+  }
+}
+

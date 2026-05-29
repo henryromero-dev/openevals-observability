@@ -1,0 +1,70 @@
+# ──────────────────────────────
+# Node / NPM
+# ──────────────────────────────
+node_modules/
+npm-debug.log
+yarn-error.log
+package-lock.json
+
+# ──────────────────────────────
+# Compilados / builds
+# ──────────────────────────────
+dist/
+tmp/
+out-tsc/
+bazel-out/
+
+# ──────────────────────────────
+# Variables de entorno y secretos
+# ──────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ──────────────────────────────
+# Angular
+# ──────────────────────────────
+.angular/cache/
+/coverage
+/libpeerconnection.log
+testem.log
+/typings
+__screenshots__/
+.sass-cache/
+/connect.lock
+
+# ──────────────────────────────
+# NestJS
+# ──────────────────────────────
+*.js.map
+
+# ──────────────────────────────
+# IDEs
+# ──────────────────────────────
+.idea/
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+
+# Visual Studio Code (conservar configuraciones útiles)
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+.history/
+
+# ──────────────────────────────
+# Claude Code (contexto local)
+# ──────────────────────────────
+.claude/
+
+# ──────────────────────────────
+# Sistema operativo
+# ──────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

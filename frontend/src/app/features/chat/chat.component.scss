@@ -1,0 +1,146 @@
+﻿@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.chat {
+  @include flex-column;
+  height: 100%;
+  max-width: 760px;
+  margin: 0 auto;
+  padding: $spacing-2xl;
+
+  &__header {
+    @include flex-row(0, flex-start);
+    justify-content: space-between;
+    padding-bottom: $spacing-xl;
+    border-bottom: 1px solid $color-border;
+    flex-shrink: 0;
+  }
+
+  &__header-left {
+    @include flex-column($spacing-xs);
+  }
+
+  &__header-right {
+    @include flex-row($spacing-sm, center);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    color: $color-text-heading;
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $color-text-muted;
+  }
+
+  &__thread-id {
+    font-size: $font-size-sm;
+    color: $color-text-quaternary;
+    font-family: monospace;
+  }
+
+  &__messages {
+    flex: 1;
+    overflow-y: auto;
+    @include flex-column($spacing-md);
+    padding: $spacing-xl 0;
+  }
+
+  &__bubble {
+    max-width: 75%;
+    @include flex-column($spacing-xs);
+
+    &--user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    &--assistant {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+  }
+
+  &__bubble-content {
+    padding: $spacing-md $spacing-lg;
+    border-radius: $radius-lg;
+    font-size: $font-size-lg;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    .chat__bubble--user & {
+      background: $color-secondary;
+      color: $color-white;
+      border-bottom-right-radius: $radius-xs;
+    }
+
+    .chat__bubble--assistant & {
+      background: $color-white;
+      border: 1px solid $color-border;
+      color: $color-text;
+      border-bottom-left-radius: $radius-xs;
+      box-shadow: $shadow-sm;
+    }
+  }
+
+  &__bubble-meta {
+    @include flex-row($spacing-xs, center);
+  }
+
+  &__typing {
+    @include flex-row($spacing-xs, center);
+    padding: $spacing-md $spacing-lg;
+    background: $color-white;
+    border: 1px solid $color-border;
+    border-radius: $radius-lg;
+    border-bottom-left-radius: $radius-xs;
+
+    span {
+      width: 6px;
+      height: 6px;
+      border-radius: $radius-pill;
+      background: $color-text-quaternary;
+      animation: typing-bounce 1.2s infinite ease-in-out;
+
+      &:nth-child(2) { animation-delay: 0.2s; }
+      &:nth-child(3) { animation-delay: 0.4s; }
+    }
+  }
+
+  &__error {
+    padding: $spacing-sm $spacing-md;
+    background: $color-danger-bg;
+    color: $color-error-dark;
+    border-radius: $radius-sm;
+    font-size: $font-size-lg;
+    flex-shrink: 0;
+  }
+
+  &__form {
+    @include flex-row($spacing-sm, center);
+    padding-top: $spacing-lg;
+    border-top: 1px solid $color-border;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    @include form-input;
+    flex: 1;
+
+    &:disabled {
+      background: $color-bg-tertiary;
+      cursor: not-allowed;
+    }
+  }
+}
+
+@keyframes typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30%           { transform: translateY(-6px); }
+}
+

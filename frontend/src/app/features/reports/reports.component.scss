@@ -1,0 +1,365 @@
+@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  padding: $spacing-2xl;
+  max-width: 1100px;
+  margin: 0 auto;
+
+  &__header {
+    @include flex-row(0, flex-start);
+    justify-content: space-between;
+    margin-bottom: $spacing-2xl;
+    padding-bottom: $spacing-xl;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__title    { font-size: $font-size-2xl; font-weight: 700; color: $color-text-heading; }
+  &__subtitle { font-size: $font-size-lg; color: $color-text-muted; margin-top: $spacing-xs; }
+  &__error    { background: $color-danger-bg; color: $color-error-dark; padding: $spacing-sm $spacing-md; border-radius: $radius-sm; margin-bottom: $spacing-lg; font-size: $font-size-lg; }
+  &__loading  { color: $color-text-muted; font-size: $font-size-lg; padding: $spacing-2xl 0; text-align: center; }
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────────
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: $spacing-lg;
+  margin-bottom: $spacing-2xl;
+
+  &--loading .stat-card { min-height: 80px; }
+}
+
+.stat-card {
+  @include card;
+  @include flex-column($spacing-xs);
+
+  &__label {
+    font-size: $font-size-sm;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+  }
+
+  &__value {
+    font-size: $font-size-3xl;
+    font-weight: 700;
+    color: $color-text-heading;
+    &--success { color: $color-success; }
+  }
+
+  &--skeleton {
+    background: $color-bg-tertiary;
+    border-color: transparent;
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.5; }
+}
+
+// ── Section ───────────────────────────────────────────────────────────────────
+
+.section {
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $color-text-heading;
+    margin-bottom: $spacing-lg;
+  }
+}
+
+// ── Simulations report table ──────────────────────────────────────────────────
+
+.sim-report-table {
+  @include flex-column;
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  overflow: hidden;
+
+  &__row {
+    display: grid;
+    grid-template-columns: 24px 2fr 1fr 90px 1fr 110px 140px;
+    gap: $spacing-md;
+    padding: $spacing-md $spacing-lg;
+    align-items: center;
+    border-bottom: 1px solid $color-border;
+    cursor: pointer;
+    transition: background 0.1s;
+
+    &:hover { background: $color-hover-bg; }
+  }
+
+  &__chevron  { color: $color-text-muted; font-size: $font-size-md; user-select: none; }
+  &__name     { font-weight: 600; color: $color-text; font-size: $font-size-lg; }
+  &__persona  { font-size: $font-size-md; color: $color-text-muted; }
+  &__turns    { font-size: $font-size-md; color: $color-text-muted; white-space: nowrap; }
+  &__date     { font-size: $font-size-md; color: $color-text-light; }
+  &__scores   { @include flex-row($spacing-xs, center); flex-wrap: wrap; }
+  &__no-scores { font-size: $font-size-md; color: $color-text-light; }
+
+  // Expanded detail panel
+  &__detail {
+    border-bottom: 1px solid $color-border;
+    padding: $spacing-lg $spacing-xl $spacing-xl $spacing-2xl;
+    background: $color-bg-secondary;
+    @include flex-column($spacing-lg);
+  }
+}
+
+// ── Score chips (inline in row) ───────────────────────────────────────────────
+
+.score-chip {
+  font-size: $font-size-sm;
+  padding: 2px $spacing-sm;
+  border-radius: $radius-xs;
+  background: $color-bg-tertiary;
+  color: $color-text-muted;
+  white-space: nowrap;
+
+  &.score--pass { background: rgba($color-success, 0.12); color: #009a3f; }
+  &.score--fail { background: $color-danger-bg; color: $color-error-dark; }
+}
+
+// ── Score detail rows (inside expanded panel) ─────────────────────────────────
+
+.scores-block {
+  @include flex-column($spacing-sm);
+  background: $color-white;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  padding: $spacing-md;
+}
+
+.score-row {
+  @include flex-row($spacing-md, flex-start);
+  flex-wrap: wrap;
+
+  &__key {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: $color-text-muted;
+    min-width: 120px;
+  }
+
+  &__value {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $color-text-muted;
+
+    &.score--pass { color: $color-success; }
+    &.score--fail { color: $color-error; }
+  }
+
+  &__reasoning {
+    font-size: $font-size-md;
+    color: $color-text-muted;
+    flex-basis: 100%;
+    padding-left: 136px;
+    line-height: 1.5;
+    margin-top: $spacing-xs;
+  }
+}
+
+// ── Two-column detail layout ──────────────────────────────────────────────────
+
+.detail-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: $spacing-xl;
+  align-items: flex-start;
+}
+
+.detail-col {
+  @include flex-column($spacing-sm);
+
+  &__title {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding-bottom: $spacing-xs;
+    border-bottom: 1px solid $color-border;
+    margin-bottom: $spacing-xs;
+  }
+}
+
+// ── LangSmith trace list ──────────────────────────────────────────────────────
+
+.trace-list {
+  @include flex-column;
+  border: 1px solid $color-border;
+  border-radius: $radius-sm;
+  overflow: hidden;
+}
+
+.trace-item {
+  @include flex-row($spacing-md, center);
+  padding: $spacing-xs $spacing-md;
+  border-bottom: 1px solid $color-border;
+  font-size: $font-size-md;
+
+  &:last-child { border-bottom: none; }
+
+  &__name { flex: 1; font-weight: 500; color: $color-text; }
+  &__meta { color: $color-text-muted; white-space: nowrap; }
+}
+
+// ── Trajectory (chat bubbles) ─────────────────────────────────────────────────
+
+.trajectory {
+  @include flex-column($spacing-sm);
+
+  &__msg {
+    @include flex-column($spacing-xs);
+    max-width: 80%;
+
+    &--user      { align-self: flex-end; align-items: flex-end; }
+    &--assistant { align-self: flex-start; align-items: flex-start; }
+  }
+
+  &__role {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-muted;
+    letter-spacing: 0.03em;
+  }
+
+  &__content {
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-md;
+    font-size: $font-size-lg;
+    line-height: 1.5;
+    white-space: pre-wrap;
+    word-break: break-word;
+
+    .trajectory__msg--user & {
+      background: $color-secondary;
+      color: $color-white;
+      border-bottom-right-radius: $radius-xs;
+    }
+
+    .trajectory__msg--assistant & {
+      background: $color-white;
+      border: 1px solid $color-border;
+      color: $color-text;
+      border-bottom-left-radius: $radius-xs;
+    }
+  }
+}
+
+// ── Drawer ────────────────────────────────────────────────────────────────────
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: $color-overlay-40;
+  z-index: 900;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 560px;
+  height: 100dvh;
+  background: $color-white;
+  box-shadow: $shadow-modal-strong;
+  z-index: 1000;
+  @include flex-column;
+
+  &__header {
+    @include flex-row(0, center);
+    justify-content: space-between;
+    padding: $spacing-lg $spacing-xl;
+    border-bottom: 1px solid $color-border;
+    flex-shrink: 0;
+  }
+
+  &__title { font-size: $font-size-xl; font-weight: 600; color: $color-text-heading; }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-xl;
+    @include flex-column($spacing-lg);
+  }
+}
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: $color-overlay-40;
+  display: grid;
+  place-items: center;
+  color: $color-white;
+  font-size: $font-size-xl;
+  font-weight: 600;
+  z-index: 1100;
+}
+
+// ── Run meta + span cards (inside drawer) ─────────────────────────────────────
+
+.run-meta {
+  @include flex-column($spacing-sm);
+  background: $color-bg-tertiary;
+  border-radius: $radius-sm;
+  padding: $spacing-md;
+
+  &__row { @include flex-row($spacing-md, flex-start); }
+
+  &__label {
+    font-size: $font-size-sm;
+    font-weight: 600;
+    color: $color-text-muted;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    min-width: 70px;
+  }
+
+  &__value { font-size: $font-size-lg; color: $color-text; word-break: break-all; }
+}
+
+.detail-section {
+  @include flex-column($spacing-sm);
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $color-text-heading;
+    padding-bottom: $spacing-sm;
+    border-bottom: 1px solid $color-border;
+  }
+}
+
+.span-card {
+  @include card;
+  @include flex-column($spacing-sm);
+
+  &__header { @include flex-row($spacing-sm, center); }
+  &__name   { font-weight: 600; color: $color-text; font-size: $font-size-lg; }
+  &__type   { font-size: $font-size-sm; color: $color-text-muted; background: $color-bg-tertiary; padding: 1px $spacing-xs; border-radius: $radius-xs; }
+  &__latency { font-size: $font-size-md; color: $color-text-muted; margin-left: auto; }
+
+  &__output {
+    background: $color-bg-tertiary;
+    border-radius: $radius-xs;
+    padding: $spacing-sm;
+    font-size: $font-size-sm;
+    color: $color-text-secondary;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 160px;
+    overflow-y: auto;
+    font-family: monospace;
+    line-height: 1.4;
+  }
+}

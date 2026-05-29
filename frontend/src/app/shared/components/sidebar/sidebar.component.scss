@@ -1,0 +1,85 @@
+@use '../../../../styles/variables' as *;
+@use '../../../../styles/mixins' as *;
+
+.sidebar {
+  width: $sidebar-width;
+  min-width: $sidebar-width;
+  height: 100dvh;
+  background: $color-secondary;
+  @include flex-column;
+  border-right: 1px solid $color-secondary-dark;
+  overflow: hidden;
+
+  &__brand {
+    @include flex-row($spacing-sm, center);
+    padding: $spacing-lg $spacing-lg $spacing-xl;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  &__brand-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: $radius-pill;
+    background: $color-primary;
+    flex-shrink: 0;
+  }
+
+  &__brand-name {
+    font-size: $font-size-md;
+    font-weight: 600;
+    color: $color-white;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  &__nav {
+    @include flex-column($spacing-xs);
+    flex: 1;
+    padding: $spacing-lg $spacing-sm;
+  }
+
+  &__item {
+    @include flex-row($spacing-sm, center);
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-sm;
+    text-decoration: none;
+    color: rgba(255, 255, 255, 0.55);
+    font-size: $font-size-lg;
+    font-weight: 500;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: rgba(255, 255, 255, 0.85);
+      text-decoration: none;
+    }
+
+    &--active {
+      background: rgba(255, 255, 255, 0.1);
+      color: $color-white;
+    }
+  }
+
+  &__item-icon {
+    width: 20px;
+    text-align: center;
+    font-size: $font-size-lg;
+    flex-shrink: 0;
+  }
+
+  &__item-label {
+    font-size: $font-size-lg;
+  }
+
+  &__footer {
+    padding: $spacing-lg;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  &__footer-text {
+    font-size: $font-size-sm;
+    color: rgba(255, 255, 255, 0.25);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+}

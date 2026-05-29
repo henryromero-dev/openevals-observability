@@ -1,0 +1,254 @@
+<div class="page">
+  <div class="page__header">
+    <div>
+      <h1 class="page__title">Reports</h1>
+      <p class="page__subtitle">Simulation results with conversation, scores, and LangSmith traces</p>
+    </div>
+  </div>
+
+  @if (error()) { <div class="page__error">{{ error() }}</div> }
+
+  <!-- Stats from LangSmith -->
+  @if (!loadingStats()) {
+    @if (stats(); as s) {
+      <div class="stats-row">
+        <div class="stat-card">
+          <span class="stat-card__label">Total runs</span>
+          <span class="stat-card__value">{{ s.totalRuns | number }}</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Success rate</span>
+          <span class="stat-card__value stat-card__value--success">{{ s.successRate }}%</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Avg latency</span>
+          <span class="stat-card__value">{{ s.avgLatencyMs | number: '1.0-0' }} ms</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-card__label">Total tokens</span>
+          <span class="stat-card__value">{{ s.totalTokens | number }}</span>
+        </div>
+      </div>
+    }
+  } @else {
+    <div class="stats-row stats-row--loading">
+      @for (i of [1,2,3,4]; track i) { <div class="stat-card stat-card--skeleton"></div> }
+    </div>
+  }
+
+  <!-- One row per simulation -->
+  <div class="section">
+    <h2 class="section__title">Simulations ({{ simulations().length }})</h2>
+
+    @if (loadingSimulations()) {
+      <div class="page__loading">Loading…</div>
+    } @else if (simulations().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">📊</div>
+        <p class="empty-state__title">No simulations yet</p>
+        <p class="empty-state__desc">Go to Simulations and run one to see results here.</p>
+      </div>
+    } @else {
+      <div class="sim-report-table">
+        @for (sim of simulations(); track sim.id) {
+
+          <!-- Collapsible header row -->
+          <div class="sim-report-table__row" (click)="toggle(sim)">
+            <span class="sim-report-table__chevron">{{ isExpanded(sim.id) ? '▾' : '▸' }}</span>
+            <span class="sim-report-table__name">{{ sim.name }}</span>
+            <span class="sim-report-table__persona">{{ sim.persona?.name ?? '—' }}</span>
+            <span><span class="badge badge--{{ sim.status }}">{{ sim.status }}</span></span>
+            <span class="sim-report-table__scores">
+              @if (sim.result?.scores?.length) {
+                @for (score of sim.result!.scores; track score.feedbackKey) {
+                  <span class="score-chip" [class]="scoreClass(score)">
+                    {{ score.feedbackKey }}: {{ scoreLabel(score) }}
+                  </span>
+                }
+              } @else {
+                <span class="sim-report-table__muted">no scores</span>
+              }
+            </span>
+            <span class="sim-report-table__muted">
+              @if (sim.status === 'running') { {{ sim.result?.turnCount ?? 0 }}/{{ sim.maxTurns }} turns }
+              @else { {{ sim.result?.turnCount ?? '—' }} turns }
+            </span>
+            <span class="sim-report-table__muted">{{ sim.createdAt | date: 'MMM d, HH:mm' }}</span>
+          </div>
+
+          <!-- Expanded detail -->
+          @if (isExpanded(sim.id)) {
+            <div class="sim-report-table__detail">
+
+              @if (sim.errorMessage) {
+                <div class="page__error">{{ sim.errorMessage }}</div>
+              }
+
+              <div class="detail-cols">
+
+                <!-- Left: scores + LangSmith traces -->
+                <div class="detail-col">
+                  <h4 class="detail-col__title">Evaluator scores</h4>
+                  @if (sim.result?.scores?.length) {
+                    <div class="scores-block">
+                      @for (score of sim.result!.scores; track score.feedbackKey) {
+                        <div class="score-row">
+                          <span class="score-row__key">{{ score.feedbackKey }}</span>
+                          <span class="score-row__value" [class]="scoreClass(score)">
+                            {{ scoreLabel(score) }}
+                          </span>
+                          @if (score.reasoning) {
+                            <p class="score-row__reasoning">{{ score.reasoning }}</p>
+                          }
+                        </div>
+                      }
+                    </div>
+                  } @else {
+                    <p class="sim-report-table__muted">No evaluators ran for this simulation.</p>
+                  }
+
+                  <h4 class="detail-col__title" style="margin-top:16px">LangSmith traces</h4>
+                  @if (!sim.langsmithRunId) {
+                    <p class="sim-report-table__muted">No thread ID — run a new simulation to link traces.</p>
+                  } @else if (isLoadingTraces(sim.id)) {
+                    <p class="sim-report-table__muted">Loading traces…</p>
+                  } @else if (getTraces(sim.id).length === 0) {
+                    <p class="sim-report-table__muted">No traces found in LangSmith for this thread.</p>
+                  } @else {
+                    <div class="trace-list">
+                      @for (run of getTraces(sim.id); track run.id) {
+                        <div class="trace-item">
+                          <span class="trace-item__name">{{ run.name }}</span>
+                          <span class="badge"
+                            [class.badge--completed]="run.status === 'success'"
+                            [class.badge--failed]="run.status === 'error'">
+                            {{ run.status }}
+                          </span>
+                          <span class="trace-item__meta">
+                            {{ getLatencyMs(run) !== null ? ((getLatencyMs(run)! | number:'1.0-0') + ' ms') : '—' }}
+                          </span>
+                          <span class="trace-item__meta">{{ run.totalTokens ?? 0 }} tokens</span>
+                          <button class="btn btn--secondary btn--sm"
+                            (click)="openRun(run); $event.stopPropagation()">
+                            View
+                          </button>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <!-- Right: conversation -->
+                <div class="detail-col">
+                  <h4 class="detail-col__title">
+                    Conversation
+                    @if (sim.result?.turnCount) { ({{ sim.result!.turnCount }} turns) }
+                  </h4>
+                  @if (sim.result?.trajectory?.length) {
+                    <div class="trajectory">
+                      @for (msg of sim.result!.trajectory; track $index) {
+                        <div class="trajectory__msg trajectory__msg--{{ msg.role }}">
+                          <span class="trajectory__role">{{ msg.role === 'user' ? '👤 User' : '🤖 Agent' }}</span>
+                          <p class="trajectory__content">{{ msg.content }}</p>
+                        </div>
+                      }
+                    </div>
+                  } @else if (sim.status === 'running' || sim.status === 'pending') {
+                    <p class="sim-report-table__muted">Simulation in progress…</p>
+                  } @else {
+                    <p class="sim-report-table__muted">No conversation data.</p>
+                  }
+                </div>
+
+              </div>
+            </div>
+          }
+        }
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Trace detail drawer -->
+@if (selectedRun(); as detail) {
+  <div class="drawer-overlay" (click)="closeDetail()"></div>
+  <aside class="drawer">
+    <div class="drawer__header">
+      <h2 class="drawer__title">{{ detail.name }}</h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="badge"
+          [class.badge--completed]="detail.status === 'success'"
+          [class.badge--failed]="detail.status === 'error'">
+          {{ detail.status }}
+        </span>
+        <button class="btn btn--ghost btn--sm" (click)="closeDetail()">✕</button>
+      </div>
+    </div>
+
+    <div class="drawer__body">
+      <div class="run-meta">
+        <div class="run-meta__row">
+          <span class="run-meta__label">ID</span>
+          <code class="run-meta__value">{{ detail.id }}</code>
+        </div>
+        <div class="run-meta__row">
+          <span class="run-meta__label">Latency</span>
+          <span class="run-meta__value">
+            {{ getLatencyMs(detail) !== null ? ((getLatencyMs(detail)! | number:'1.0-0') + ' ms') : '—' }}
+          </span>
+        </div>
+        <div class="run-meta__row">
+          <span class="run-meta__label">Tokens</span>
+          <span class="run-meta__value">{{ detail.totalTokens ?? '—' }}</span>
+        </div>
+        <div class="run-meta__row">
+          <span class="run-meta__label">Started</span>
+          <span class="run-meta__value">{{ detail.startTime | date: 'MMM d, HH:mm:ss' }}</span>
+        </div>
+      </div>
+
+      @if (detail.error) {
+        <div class="page__error">{{ detail.error }}</div>
+      }
+
+      @if (detail.inputs && (detail.inputs | json) !== '{}') {
+        <section class="detail-section">
+          <h3 class="detail-section__title">Input</h3>
+          <pre class="span-card__output">{{ detail.inputs | json }}</pre>
+        </section>
+      }
+
+      @if (detail.outputs && (detail.outputs | json) !== '{}') {
+        <section class="detail-section">
+          <h3 class="detail-section__title">Output</h3>
+          <pre class="span-card__output">{{ detail.outputs | json }}</pre>
+        </section>
+      }
+
+      @if (detail.children.length > 0) {
+        <section class="detail-section">
+          <h3 class="detail-section__title">Graph nodes ({{ detail.children.length }})</h3>
+          @for (child of detail.children; track child.id) {
+            <div class="span-card">
+              <div class="span-card__header">
+                <span class="span-card__name">{{ child.name }}</span>
+                <code class="span-card__type">{{ child.runType }}</code>
+                <span class="span-card__latency">
+                  {{ child.latencyMs !== null ? child.latencyMs + ' ms' : '—' }}
+                </span>
+                @if (child.error) { <span class="badge badge--failed">error</span> }
+              </div>
+              @if (child.outputs && (child.outputs | json) !== '{}') {
+                <pre class="span-card__output">{{ child.outputs | json }}</pre>
+              }
+            </div>
+          }
+        </section>
+      }
+    </div>
+  </aside>
+}
+
+@if (loadingDetail()) {
+  <div class="loading-overlay">Loading trace…</div>
+}

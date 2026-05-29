@@ -1,0 +1,184 @@
+<div class="page">
+  <div class="page__header">
+    <div>
+      <h1 class="page__title">Simulations</h1>
+      <p class="page__subtitle">Run multi-turn conversations between personas and the LangGraph agent</p>
+    </div>
+    <button class="btn btn--primary" (click)="openCreate()">▶ Run simulation</button>
+  </div>
+
+  @if (error()) { <div class="page__error">{{ error() }}</div> }
+
+  @if (loading()) {
+    <div class="page__loading">Loading…</div>
+  } @else if (simulations().length === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon">▶️</div>
+      <p class="empty-state__title">No simulations yet</p>
+      <p class="empty-state__desc">Select a persona and click "Run simulation" to start.</p>
+    </div>
+  } @else {
+    <div class="sim-table">
+      <div class="sim-table__head">
+        <span>Name</span>
+        <span>Persona</span>
+        <span>Status</span>
+        <span>Turns</span>
+        <span>Started</span>
+        <span></span>
+      </div>
+      @for (sim of simulations(); track sim.id) {
+        <div class="sim-table__row">
+          <span class="sim-table__name">{{ sim.name }}</span>
+          <span class="sim-table__persona">{{ sim.persona ? sim.persona.name : '—' }}</span>
+          <span><span class="badge badge--{{ sim.status }}">{{ sim.status }}</span></span>
+          <span class="sim-table__turns">
+            @if (sim.status === 'running' || sim.status === 'pending') {
+              {{ sim.result?.turnCount ?? 0 }} / {{ sim.maxTurns }}
+            } @else {
+              {{ sim.result?.turnCount ?? '—' }}
+            }
+          </span>
+          <span class="sim-table__date">{{ sim.createdAt | date: 'MMM d, HH:mm' }}</span>
+          <div class="sim-table__actions">
+            @if (sim.status === 'running' || sim.status === 'pending') {
+              <button class="btn btn--ghost btn--sm" (click)="refreshSimulation(sim.id)">↻</button>
+            }
+            <button class="btn btn--secondary btn--sm" (click)="viewDetail(sim)">View</button>
+            <button class="btn btn--ghost btn--sm" (click)="rerun(sim)" title="Re-run with same settings">↺ Re-run</button>
+            <button class="btn btn--danger btn--sm" (click)="onDelete(sim.id)">Delete</button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Create form drawer -->
+@if (showForm()) {
+  <div class="drawer-overlay" (click)="closeForm()"></div>
+  <aside class="drawer">
+    <div class="drawer__header">
+      <h2 class="drawer__title">New simulation</h2>
+      <button class="btn btn--ghost btn--sm" (click)="closeForm()">✕</button>
+    </div>
+
+    <div class="drawer__body">
+      <div class="field">
+        <label class="field__label">Name *</label>
+        <input class="field__input" type="text" placeholder="e.g. Angry customer — refund flow"
+          [value]="form().name" (input)="updateField('name', $any($event.target).value)" />
+      </div>
+
+      <div class="field">
+        <label class="field__label">Persona *</label>
+        <select class="field__input" [value]="form().personaId ?? ''"
+          (change)="updateField('personaId', +$any($event.target).value)">
+          <option value="" disabled>Select a persona…</option>
+          @for (p of personas(); track p.id) {
+            <option [value]="p.id">{{ p.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label class="field__label">Initial message *</label>
+        <textarea class="field__textarea" rows="3"
+          placeholder="I need a refund for my order!"
+          [value]="form().initialMessage"
+          (input)="updateField('initialMessage', $any($event.target).value)"></textarea>
+        <span class="field__hint">First message the simulated user sends.</span>
+      </div>
+
+      <div class="field">
+        <label class="field__label">Max turns</label>
+        <input class="field__input" type="number" min="2" max="20"
+          [value]="form().maxTurns"
+          (input)="updateField('maxTurns', +$any($event.target).value)" />
+      </div>
+
+      @if (evaluators().length > 0) {
+        <div class="field">
+          <label class="field__label">Evaluators</label>
+          <div class="evaluator-picker">
+            @for (ev of evaluators(); track ev.id) {
+              <label class="evaluator-picker__item" [class.evaluator-picker__item--selected]="isEvaluatorSelected(ev.id)">
+                <input type="checkbox" [checked]="isEvaluatorSelected(ev.id)" (change)="toggleEvaluator(ev.id)" />
+                <span>{{ ev.name }}</span>
+                <code>{{ ev.feedbackKey }}</code>
+              </label>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="drawer__footer">
+      <button class="btn btn--secondary" (click)="closeForm()">Cancel</button>
+      <button class="btn btn--primary" [disabled]="!canSubmit()" (click)="onSave()">
+        {{ saving() ? 'Starting…' : '▶ Start simulation' }}
+      </button>
+    </div>
+  </aside>
+}
+
+<!-- Detail drawer -->
+@if (selectedSimulation(); as sim) {
+  <div class="drawer-overlay" (click)="closeDetail()"></div>
+  <aside class="drawer drawer--wide">
+    <div class="drawer__header">
+      <h2 class="drawer__title">{{ sim.name }}</h2>
+      <div style="display:flex; gap: 8px; align-items: center;">
+        @if (sim.status === 'running' || sim.status === 'pending') {
+          <button class="btn btn--secondary btn--sm" (click)="refreshSimulation(sim.id)">↻ Refresh</button>
+        }
+        <span class="badge badge--{{ sim.status }}">{{ sim.status }}</span>
+        <button class="btn btn--ghost btn--sm" (click)="closeDetail()">✕</button>
+      </div>
+    </div>
+
+    <div class="drawer__body">
+      @if (sim.errorMessage) {
+        <div class="page__error">{{ sim.errorMessage }}</div>
+      }
+
+      <!-- Scores -->
+      @if (sim.result?.scores?.length) {
+        <section class="detail-section">
+          <h3 class="detail-section__title">Evaluator scores</h3>
+          <div class="scores-grid">
+            @for (score of sim.result!.scores; track score.feedbackKey) {
+              <div class="score-card">
+                <span class="score-card__key">{{ score.feedbackKey }}</span>
+                <span class="score-card__value" [class.score-card__value--pass]="score.score === true"
+                  [class.score-card__value--fail]="score.score === false">
+                  {{ score.score === true ? '✓ Pass' : score.score === false ? '✗ Fail' : score.score }}
+                </span>
+                @if (score.reasoning) {
+                  <p class="score-card__reasoning">{{ score.reasoning }}</p>
+                }
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      <!-- Trajectory -->
+      @if (sim.result?.trajectory?.length) {
+        <section class="detail-section">
+          <h3 class="detail-section__title">Conversation ({{ sim.result!.turnCount }} turns)</h3>
+          <div class="trajectory">
+            @for (msg of sim.result!.trajectory; track $index) {
+              <div class="trajectory__msg trajectory__msg--{{ msg.role }}">
+                <span class="trajectory__role">{{ msg.role }}</span>
+                <p class="trajectory__content">{{ msg.content }}</p>
+              </div>
+            }
+          </div>
+        </section>
+      } @else if (sim.status === 'pending' || sim.status === 'running') {
+        <div class="page__loading">Simulation in progress…</div>
+      }
+    </div>
+  </aside>
+}

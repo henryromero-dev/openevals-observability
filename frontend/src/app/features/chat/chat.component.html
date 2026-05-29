@@ -1,0 +1,86 @@
+<div class="chat">
+  <!-- Header -->
+  <div class="chat__header">
+    <div class="chat__header-left">
+      <h1 class="chat__title">Chat</h1>
+      <p class="chat__subtitle">Interact manually with the LangGraph agent</p>
+    </div>
+    <div class="chat__header-right">
+      @if (threadId()) {
+        <span class="chat__thread-id">Thread: {{ threadId()!.slice(0, 8) }}…</span>
+      }
+      @if (lastIntent()) {
+        <span class="badge badge--{{ lastIntent() }}">{{ lastIntent() }}</span>
+      }
+      @if (isEscalated()) {
+        <span class="badge badge--failed">⚠ Escalated</span>
+      }
+      <button class="btn btn--secondary btn--sm" (click)="onReset()">
+        New conversation
+      </button>
+    </div>
+  </div>
+
+  <!-- Messages -->
+  <div class="chat__messages">
+    @if (messages().length === 0) {
+      <div class="empty-state">
+        <div class="empty-state__icon">💬</div>
+        <p class="empty-state__title">Start a conversation</p>
+        <p class="empty-state__desc">
+          Try asking for a refund, reporting a bug, or any general question to see
+          how the graph classifies and responds.
+        </p>
+      </div>
+    }
+
+    @for (msg of messages(); track $index) {
+      <div class="chat__bubble chat__bubble--{{ msg.role }}">
+        <div class="chat__bubble-content">{{ msg.content }}</div>
+        @if (msg.role === 'assistant' && msg.intent) {
+          <div class="chat__bubble-meta">
+            <span class="badge badge--{{ msg.intent }}">{{ msg.intent }}</span>
+            @if (msg.escalate) {
+              <span class="badge badge--failed">escalated</span>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    @if (isSending()) {
+      <div class="chat__bubble chat__bubble--assistant">
+        <div class="chat__typing">
+          <span></span><span></span><span></span>
+        </div>
+      </div>
+    }
+
+    <div #messagesEnd></div>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="chat__error">{{ error() }}</div>
+  }
+
+  <!-- Input -->
+  <form class="chat__form" (submit)="onSubmit($event)">
+    <input
+      class="chat__input"
+      type="text"
+      placeholder="Type a message…"
+      [ngModel]="inputValue()"
+      (ngModelChange)="inputValue.set($event)"
+      [disabled]="isSending()"
+      autocomplete="off"
+    />
+    <button
+      class="btn btn--primary"
+      type="submit"
+      [disabled]="!inputValue().trim() || isSending()"
+    >
+      Send
+    </button>
+  </form>
+</div>

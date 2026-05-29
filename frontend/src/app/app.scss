@@ -1,0 +1,14 @@
+@use '../styles/variables' as *;
+
+:host {
+  display: flex;
+  height: 100dvh;
+  overflow: hidden;
+}
+
+.shell__content {
+  flex: 1;
+  overflow-y: auto;
+  background: $color-canvas-bg;
+  min-width: 0;
+}

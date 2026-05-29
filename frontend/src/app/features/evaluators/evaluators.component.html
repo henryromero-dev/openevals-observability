@@ -1,0 +1,140 @@
+<div class="page">
+  <div class="page__header">
+    <div>
+      <h1 class="page__title">Evaluators</h1>
+      <p class="page__subtitle">Custom LLM-as-judge prompts to score simulation trajectories</p>
+    </div>
+    <button class="btn btn--primary" (click)="openCreate()">+ New evaluator</button>
+  </div>
+
+  @if (error()) {
+    <div class="page__error">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page__loading">Loading…</div>
+  } @else if (evaluators().length === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon">⚖️</div>
+      <p class="empty-state__title">No evaluators yet</p>
+      <p class="empty-state__desc">Create an evaluator with a rubric prompt to score simulation conversations.</p>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (ev of evaluators(); track ev.id) {
+        <div class="evaluator-card">
+          <div class="evaluator-card__header">
+            <div class="evaluator-card__header-left">
+              <span class="evaluator-card__name">{{ ev.name }}</span>
+              <code class="evaluator-card__key">{{ ev.feedbackKey }}</code>
+            </div>
+            <div class="evaluator-card__actions">
+              <button class="btn btn--ghost btn--sm" (click)="openEdit(ev)">Edit</button>
+              <button class="btn btn--danger btn--sm" (click)="onDelete(ev.id)">Delete</button>
+            </div>
+          </div>
+          @if (ev.description) {
+            <p class="evaluator-card__desc">{{ ev.description }}</p>
+          }
+          <pre class="evaluator-card__prompt">{{ ev.promptTemplate }}</pre>
+          <div class="evaluator-card__footer">
+            <code class="evaluator-card__model">{{ ev.model }}</code>
+            <span class="evaluator-card__date">{{ ev.createdAt | date: 'MMM d, y' }}</span>
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+@if (showForm()) {
+  <div class="drawer-overlay" (click)="closeForm()"></div>
+  <aside class="drawer">
+    <div class="drawer__header">
+      <h2 class="drawer__title">{{ formMode() === 'create' ? 'New evaluator' : 'Edit evaluator' }}</h2>
+      <button class="btn btn--ghost btn--sm" (click)="closeForm()">✕</button>
+    </div>
+
+    <div class="drawer__body">
+      <div class="field">
+        <label class="field__label">Name *</label>
+        <input
+          class="field__input"
+          type="text"
+          placeholder="e.g. Toxicity Evaluator"
+          [value]="form().name"
+          (input)="updateField('name', $any($event.target).value)"
+        />
+      </div>
+
+      <div class="field">
+        <label class="field__label">Feedback key *</label>
+        <input
+          class="field__input"
+          type="text"
+          placeholder="e.g. toxicity"
+          [value]="form().feedbackKey"
+          (input)="updateField('feedbackKey', $any($event.target).value)"
+        />
+        <span class="field__hint">Identifier for the score in reports (lowercase, no spaces).</span>
+      </div>
+
+      <div class="field">
+        <label class="field__label">Model</label>
+        <input
+          class="field__input"
+          type="text"
+          placeholder="openai:gpt-4o-mini"
+          [value]="form().model"
+          (input)="updateField('model', $any($event.target).value)"
+        />
+      </div>
+
+      <div class="field">
+        <label class="field__label">Description</label>
+        <input
+          class="field__input"
+          type="text"
+          placeholder="Short description of what this evaluates"
+          [value]="form().description"
+          (input)="updateField('description', $any($event.target).value)"
+        />
+      </div>
+
+      <div class="field">
+        <label class="field__label">Score description *</label>
+        <input
+          class="field__input"
+          type="text"
+          placeholder="TRUE if toxic content detected. FALSE otherwise."
+          [value]="form().scoreDescription"
+          (input)="updateField('scoreDescription', $any($event.target).value)"
+        />
+        <span class="field__hint">Sent to the LLM to clarify what TRUE and FALSE mean for this score.</span>
+      </div>
+
+      <div class="field">
+        <label class="field__label">Prompt template *</label>
+        <textarea
+          class="field__textarea"
+          rows="12"
+          [placeholder]="promptPlaceholder"
+          [value]="form().promptTemplate"
+          (input)="updateField('promptTemplate', $any($event.target).value)"
+        ></textarea>
+        <span class="field__hint">{{ promptHint }}</span>
+      </div>
+    </div>
+
+    <div class="drawer__footer">
+      <button class="btn btn--secondary" (click)="closeForm()">Cancel</button>
+      <button
+        class="btn btn--primary"
+        [disabled]="!form().name.trim() || !form().promptTemplate.trim() || !form().feedbackKey.trim() || saving()"
+        (click)="onSave()"
+      >
+        {{ saving() ? 'Saving…' : 'Save evaluator' }}
+      </button>
+    </div>
+  </aside>
+}

@@ -1,0 +1,100 @@
+<div class="page">
+  <div class="page__header">
+    <div>
+      <h1 class="page__title">Personas</h1>
+      <p class="page__subtitle">Simulated users with custom personalities</p>
+    </div>
+    <button class="btn btn--primary" (click)="openCreate()">+ New persona</button>
+  </div>
+
+  @if (error()) {
+    <div class="page__error">{{ error() }}</div>
+  }
+
+  @if (loading()) {
+    <div class="page__loading">Loading…</div>
+  } @else if (personas().length === 0) {
+    <div class="empty-state">
+      <div class="empty-state__icon">🧑‍🎭</div>
+      <p class="empty-state__title">No personas yet</p>
+      <p class="empty-state__desc">Create a persona to define how the simulated user behaves during a simulation.</p>
+    </div>
+  } @else {
+    <div class="card-grid">
+      @for (p of personas(); track p.id) {
+        <div class="persona-card">
+          <div class="persona-card__header">
+            <span class="persona-card__name">{{ p.name }}</span>
+            <div class="persona-card__actions">
+              <button class="btn btn--ghost btn--sm" (click)="openEdit(p)">Edit</button>
+              <button class="btn btn--danger btn--sm" (click)="onDelete(p.id)">Delete</button>
+            </div>
+          </div>
+          @if (p.description) {
+            <p class="persona-card__desc">{{ p.description }}</p>
+          }
+          <pre class="persona-card__prompt">{{ p.systemPrompt }}</pre>
+          <span class="persona-card__date">Created {{ p.createdAt | date: 'MMM d, y' }}</span>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Form drawer -->
+@if (showForm()) {
+  <div class="drawer-overlay" (click)="closeForm()"></div>
+  <aside class="drawer">
+    <div class="drawer__header">
+      <h2 class="drawer__title">{{ formMode() === 'create' ? 'New persona' : 'Edit persona' }}</h2>
+      <button class="btn btn--ghost btn--sm" (click)="closeForm()">✕</button>
+    </div>
+
+    <div class="drawer__body">
+      <div class="field">
+        <label class="field__label">Name *</label>
+        <input
+          class="field__input"
+          type="text"
+          placeholder="e.g. Angry Customer"
+          [value]="form().name"
+          (input)="updateField('name', $any($event.target).value)"
+        />
+      </div>
+
+      <div class="field">
+        <label class="field__label">Description</label>
+        <input
+          class="field__input"
+          type="text"
+          placeholder="Short note about this persona"
+          [value]="form().description"
+          (input)="updateField('description', $any($event.target).value)"
+        />
+      </div>
+
+      <div class="field">
+        <label class="field__label">System prompt *</label>
+        <textarea
+          class="field__textarea"
+          rows="8"
+          placeholder="You are an angry customer who wants a refund..."
+          [value]="form().systemPrompt"
+          (input)="updateField('systemPrompt', $any($event.target).value)"
+        ></textarea>
+        <span class="field__hint">This prompt defines the personality of the simulated user.</span>
+      </div>
+    </div>
+
+    <div class="drawer__footer">
+      <button class="btn btn--secondary" (click)="closeForm()">Cancel</button>
+      <button
+        class="btn btn--primary"
+        [disabled]="!form().name.trim() || !form().systemPrompt.trim() || saving()"
+        (click)="onSave()"
+      >
+        {{ saving() ? 'Saving…' : 'Save persona' }}
+      </button>
+    </div>
+  </aside>
+}

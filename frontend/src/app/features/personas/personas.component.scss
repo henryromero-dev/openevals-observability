@@ -1,0 +1,146 @@
+﻿@use 'styles/variables' as *;
+@use 'styles/mixins' as *;
+
+.page {
+  padding: $spacing-2xl;
+  max-width: 960px;
+  margin: 0 auto;
+
+  &__header {
+    @include flex-row(0, flex-start);
+    justify-content: space-between;
+    margin-bottom: $spacing-2xl;
+    padding-bottom: $spacing-xl;
+    border-bottom: 1px solid $color-border;
+  }
+
+  &__title {
+    font-size: $font-size-2xl;
+    font-weight: 700;
+    color: $color-text-heading;
+  }
+
+  &__subtitle {
+    font-size: $font-size-lg;
+    color: $color-text-muted;
+    margin-top: $spacing-xs;
+  }
+
+  &__error {
+    background: $color-danger-bg;
+    color: $color-error-dark;
+    padding: $spacing-sm $spacing-md;
+    border-radius: $radius-sm;
+    font-size: $font-size-lg;
+    margin-bottom: $spacing-lg;
+  }
+
+  &__loading {
+    color: $color-text-muted;
+    font-size: $font-size-lg;
+    padding: $spacing-2xl 0;
+    text-align: center;
+  }
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: $spacing-lg;
+}
+
+.persona-card {
+  @include card;
+  @include flex-column($spacing-sm);
+
+  &__header {
+    @include flex-row(0, center);
+    justify-content: space-between;
+  }
+
+  &__name {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $color-text-heading;
+  }
+
+  &__actions {
+    @include flex-row($spacing-xs, center);
+  }
+
+  &__desc {
+    font-size: $font-size-lg;
+    color: $color-text-muted;
+  }
+
+  &__prompt {
+    background: $color-bg-tertiary;
+    border-radius: $radius-sm;
+    padding: $spacing-sm $spacing-md;
+    font-size: $font-size-md;
+    color: $color-text-secondary;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 120px;
+    overflow-y: auto;
+    font-family: monospace;
+    line-height: 1.5;
+  }
+
+  &__date {
+    font-size: $font-size-sm;
+    color: $color-text-quaternary;
+    margin-top: auto;
+  }
+}
+
+// â”€â”€ Drawer â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: $color-overlay-40;
+  z-index: 900;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 480px;
+  height: 100dvh;
+  background: $color-white;
+  box-shadow: $shadow-modal-strong;
+  z-index: 1000;
+  @include flex-column;
+
+  &__header {
+    @include flex-row(0, center);
+    justify-content: space-between;
+    padding: $spacing-lg $spacing-xl;
+    border-bottom: 1px solid $color-border;
+    flex-shrink: 0;
+  }
+
+  &__title {
+    font-size: $font-size-xl;
+    font-weight: 600;
+    color: $color-text-heading;
+  }
+
+  &__body {
+    flex: 1;
+    overflow-y: auto;
+    padding: $spacing-xl;
+    @include flex-column($spacing-lg);
+  }
+
+  &__footer {
+    @include flex-row($spacing-sm, center);
+    justify-content: flex-end;
+    padding: $spacing-lg $spacing-xl;
+    border-top: 1px solid $color-border;
+    flex-shrink: 0;
+  }
+}
+

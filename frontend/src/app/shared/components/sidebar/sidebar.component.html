@@ -1,0 +1,23 @@
+<aside class="sidebar">
+  <div class="sidebar__brand">
+    <span class="sidebar__brand-dot"></span>
+    <span class="sidebar__brand-name">Observability</span>
+  </div>
+
+  <nav class="sidebar__nav">
+    @for (item of navItems; track item.path) {
+      <a
+        class="sidebar__item"
+        [routerLink]="item.path"
+        routerLinkActive="sidebar__item--active"
+      >
+        <span class="sidebar__item-icon">{{ item.icon }}</span>
+        <span class="sidebar__item-label">{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <div class="sidebar__footer">
+    <span class="sidebar__footer-text">LangGraph</span>
+  </div>
+</aside>
